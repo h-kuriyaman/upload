@@ -22,14 +22,15 @@
     // ここに Firebase 初期化とアップロードのJavaScriptコードを記述
 
     const firebaseConfig = {
-    apiKey: "AIzaSyDBj10kt6v-S-7zH4UzqNOid8ulqearo94",
+  apiKey: "AIzaSyDBj10kt6v-S-7zH4UzqNOid8ulqearo94",
   authDomain: "scan-upload-79c0b.firebaseapp.com",
   databaseURL: "https://scan-upload-79c0b-default-rtdb.firebaseio.com",
   projectId: "scan-upload-79c0b",
-  storageBucket: "scan-upload-79c0b.firebasestorage.app",
+  storageBucket: "scan-upload-79c0b.appspot.com",  // ← 修正！
   messagingSenderId: "652790709963",
   appId: "1:652790709963:web:54e32172281c87febae54e"
-    };
+};
+
 
     firebase.initializeApp(firebaseConfig);
 
