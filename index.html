@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Firebase アップロード</title>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+</head>
+<body>
+  <h2>ファイルアップロード</h2>
+
+  <input type="file" id="fileInput" accept="image/*,application/pdf" />
+  <button id="uploadBtn">アップロード</button>
+
+  <p id="status"></p>
+
+  <script>
+    // ここに Firebase 初期化とアップロードのJavaScriptコードを記述
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    // 匿名ログイン
+    firebase.auth().signInAnonymously()
+      .then(() => {
+        document.getElementById("status").innerText = "匿名ログイン成功";
+      })
+      .catch((error) => {
+        document.getElementById("status").innerText = "匿名ログイン失敗: " + error.message;
+      });
+
+    document.getElementById("uploadBtn").addEventListener("click", () => {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+      if (!file) {
+        alert("ファイルを選択してください");
+        return;
+      }
+      uploadFile(file);
+    });
+
+    function uploadFile(file) {
+      if (!firebase.auth().currentUser) {
+        alert("ログインしていません");
+        return;
+      }
+
+      const statusElem = document.getElementById("status");
+      statusElem.innerText = "アップロード中…";
+
+      const storageRef = firebase.storage().ref("uploads/" + Date.now() + "_" + file.name);
+      storageRef.put(file)
+        .then((snapshot) => snapshot.ref.getDownloadURL())
+        .then((url) => {
+          const dbRef = firebase.database().ref("files");
+          const newFileRef = dbRef.push();
+          return newFileRef.set({
+            name: file.name,
+            url: url,
+            timestamp: Date.now()
+          });
+        })
+        .then(() => {
+          statusElem.innerText = "アップロード＆DB保存完了！";
+        })
+        .catch((error) => {
+          statusElem.innerText = "エラー: " + error.message;
+        });
+    }
+  </script>
+</body>
+</html>
